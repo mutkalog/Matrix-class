@@ -1,47 +1,63 @@
 #include "../header_files/matrix.h"
-#include <ostream>
+#include <cstring>
 #include <istream>
+#include <ostream>
 
-Matrix::Matrix(int rows, int columns)
-    : _rows(rows), _columns(columns), matrix(new int[_rows * _columns]) {}
+Matrix::Matrix() : 
+    _rows(0),
+    _columns(0) {}
 
-Matrix::Matrix(const Matrix &obj)
-    : _rows(obj._rows), _columns(obj._columns),
-      matrix(new int[_rows * _columns]) {
-  for (size_t i = 0; i != (_columns * _rows); ++i) {
-    matrix[i] = obj.matrix[i];
-  }
+Matrix::Matrix(int rows, int columns) :
+    _rows(rows),
+    _columns(columns),
+    matrix(new int[_rows * _columns]) {}
+
+Matrix::Matrix(const Matrix &obj) :
+      _rows(obj._rows),
+      _columns(obj._columns),
+      matrix(new int[obj._rows * obj._columns]) { 
+  memcpy(matrix, obj.matrix, sizeof(int) * obj._columns * obj._rows);
 }
 
-Matrix::Matrix(Matrix &&obj)
-    : _rows(obj._rows), _columns(obj._columns), matrix(obj.matrix) {
+void Matrix::setSize(int rows, int columns) {
+  delete[] matrix;
+  matrix = nullptr;
+
+  _rows = rows;
+  _columns = columns;
+  if (_rows && columns)
+    matrix = new int[_rows * _columns];
+}
+
+Matrix::Matrix(Matrix &&obj) noexcept :
+    _rows(obj._rows),
+    _columns(obj._columns),
+    matrix(obj.matrix) {
   obj.matrix = nullptr;
   obj._rows = 0;
   obj._columns = 0;
 }
 
-Matrix &Matrix::operator=(const Matrix &m2) {
-  delete[] matrix;
-  _rows = m2._rows;
-  _columns = m2._columns;
-  matrix = new int[_rows * _columns];
-  for (size_t i = 0; i != (_columns * _rows); ++i) {
-    matrix[i] = m2.matrix[i];
-  }
+void Matrix::swap(Matrix &obj) {
+  std::swap(_rows, obj._rows);
+  std::swap(_columns, obj._columns);
+  std::swap(matrix, obj.matrix);
+}
+
+Matrix &Matrix::operator=(const Matrix &m2) noexcept {
+  Matrix(m2).swap(*this);
   return *this;
 }
 
-Matrix &Matrix::operator=(Matrix &&m2) {
-  delete[] matrix;
-  matrix = m2.matrix;
-  m2.matrix = nullptr;
-  _columns = m2._columns;
-  _rows = m2._rows;
-
+Matrix &Matrix::operator=(Matrix &&m2) noexcept {
+  this->swap(m2);
   return *this;
 }
 
-Matrix::~Matrix() { delete[] matrix; }
+Matrix::~Matrix() {
+  if (_rows && _columns)
+    delete[] matrix;
+}
 
 void Matrix::makeRandomElements(int border) {
   for (size_t i = 0; i != (_rows * _columns); ++i) {

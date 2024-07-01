@@ -5,17 +5,23 @@
 
 class Matrix {
 public:
+  Matrix();
+
   Matrix(int rows, int columns);
 
   Matrix(const Matrix &obj);
 
-  Matrix(Matrix &&obj);
+  Matrix(Matrix &&obj) noexcept;
 
-  Matrix &operator=(const Matrix &m2);
+  Matrix &operator=(const Matrix &m2) noexcept;
 
-  Matrix &operator=(Matrix &&m2);
+  Matrix &operator=(Matrix &&m2) noexcept;
   
   ~Matrix();
+
+  void setSize(int rows, int columns);
+
+  void swap(Matrix &obj);
 
   void makeRandomElements(int border = 10);
 
